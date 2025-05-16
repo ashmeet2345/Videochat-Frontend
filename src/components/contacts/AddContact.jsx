@@ -7,6 +7,7 @@ const AddContact = ({ onAddContact, onCancel }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [pendingRequests, setPendingRequests] = useState([]); // Track pending requests
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) return;
@@ -17,7 +18,7 @@ const AddContact = ({ onAddContact, onCancel }) => {
       console.log(`Searching with term: ${searchTerm}`);
       console.log(`Request URL will be: /api/users?search=${encodeURIComponent(searchTerm)}`);
       // Make an API call to search for users
-      const response = await userApi.getUsers({ searchTerm });
+      const response = await userApi.getUsers( searchTerm );
       console.log('Search response:', response);
       setSearchResults(response.data);
       
@@ -38,8 +39,21 @@ const AddContact = ({ onAddContact, onCancel }) => {
     }
   };
 
-  const handleAdd = (userId) => {
-    onAddContact(userId);
+  const handleSendRequest = async (userId) => {
+    try {
+      // Track this request as pending in the UI 
+      setPendingRequests([...pendingRequests, userId]);
+      await onAddContact(userId);
+    } catch (error) {
+      // Remove from pending if it fails
+      setPendingRequests(pendingRequests.filter(id => id !== userId));
+      console.error('Failed to send contact request:', error);
+    }
+  };
+
+  // Check if a request is pending for this user
+  const isRequestPending = (userId) => {
+    return pendingRequests.includes(userId);
   };
 
   return (
@@ -77,10 +91,11 @@ const AddContact = ({ onAddContact, onCancel }) => {
               </div>
             </div>
             <button 
-              onClick={() => handleAdd(user.id)}
-              className="add-button"
+              onClick={() => handleSendRequest(user.id)}
+              className={`add-button ${isRequestPending(user.id) ? 'pending' : ''}`}
+              disabled={isRequestPending(user.id)}
             >
-              Add
+              {isRequestPending(user.id) ? 'Pending' : 'Send Request'}
             </button>
           </div>
         ))}

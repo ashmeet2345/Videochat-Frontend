@@ -55,6 +55,7 @@ export const userApi = {
 // Contacts API
 export const contactsApi = {
   getContacts: () => apiClient.get('/contacts'),
+  getPendingContacts: () => apiClient.get('/contacts/pending'),
   addContact: (userId) => apiClient.post('/contacts', { userId }),
   removeContact: (contactId) => apiClient.delete(`/contacts/${contactId}`),
   acceptContact: (contactId) => apiClient.put(`/contacts/${contactId}/accept`),
