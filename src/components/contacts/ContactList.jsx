@@ -3,6 +3,7 @@ import { contactsApi } from '../../services/api';
 import ContactItem from './ContactItem';
 import ContactSearch from './ContactSearch';
 import AddContact from './AddContact';
+import PendingContactsSummary from './PendingContactsSummary';
 import './ContactList.css';
 
 const ContactList = ({ onSelectContact }) => {
@@ -12,6 +13,7 @@ const ContactList = ({ onSelectContact }) => {
   const [error, setError] = useState('');
   const [showAddContact, setShowAddContact] = useState(false);
   const [activeTab, setActiveTab] = useState('contacts'); // 'contacts' or 'pending'
+  const [showPendingSummary, setShowPendingSummary] = useState(false);
 
   useEffect(() => {
     fetchContacts();
@@ -20,9 +22,16 @@ const ContactList = ({ onSelectContact }) => {
   const fetchContacts = async () => {
     try {
       setLoading(true);
-      const response = await contactsApi.getContacts();
-      setContacts(response.data);
-      setFilteredContacts(response.data);
+      console.log('Fetching contacts...');
+      
+      // First get the regular contacts
+      const contactsResponse = await contactsApi.getContacts();
+      console.log('Contacts response:', contactsResponse.data);
+      
+      let allContacts = [...contactsResponse.data];
+      
+      setContacts(allContacts);
+      setFilteredContacts(allContacts);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching contacts:', error);
@@ -48,7 +57,7 @@ const ContactList = ({ onSelectContact }) => {
   const handleAddContact = async (userId) => {
     try {
       await contactsApi.addContact(userId);
-      fetchContacts(); // Refresh contacts
+      await fetchContacts(); // Refresh contacts
       setShowAddContact(false);
       // Switch to pending tab after sending a request
       setActiveTab('pending');
@@ -61,7 +70,7 @@ const ContactList = ({ onSelectContact }) => {
   const handleAcceptContact = async (contactId) => {
     try {
       await contactsApi.acceptContact(contactId);
-      fetchContacts(); // Refresh contacts
+      await fetchContacts(); // Refresh contacts
       // Switch to contacts tab after accepting
       setActiveTab('contacts');
     } catch (error) {
@@ -73,7 +82,7 @@ const ContactList = ({ onSelectContact }) => {
   const handleRejectContact = async (contactId) => {
     try {
       await contactsApi.rejectContact(contactId);
-      fetchContacts(); // Refresh contacts
+      await fetchContacts(); // Refresh contacts
     } catch (error) {
       console.error('Error rejecting contact:', error);
       alert('Failed to reject contact request. Please try again.');
@@ -84,7 +93,7 @@ const ContactList = ({ onSelectContact }) => {
     if (window.confirm('Are you sure you want to remove this contact?')) {
       try {
         await contactsApi.removeContact(contactId);
-        fetchContacts(); // Refresh contacts
+        await fetchContacts(); // Refresh contacts
       } catch (error) {
         console.error('Error removing contact:', error);
         alert('Failed to remove contact. Please try again.');
@@ -96,20 +105,32 @@ const ContactList = ({ onSelectContact }) => {
     setShowAddContact(!showAddContact);
   };
 
+  const togglePendingSummary = () => {
+    setShowPendingSummary(!showPendingSummary);
+  };
+
   // Filter contacts based on active tab and search term
   const getDisplayedContacts = () => {
     if (activeTab === 'contacts') {
-      return filteredContacts.filter(contact => contact.status === 'accepted');
+      return filteredContacts.filter(contact => contact.status === 'ACCEPTED');
     } else {
-      return filteredContacts.filter(contact => contact.status === 'pending');
+      return filteredContacts.filter(contact => contact.status === 'PENDING');
     }
   };
   
+  // Get all pending contacts for the summary
+  const getPendingContacts = () => {
+    return contacts.filter(contact => contact.status === 'PENDING');
+  };
+  
   // Get counts for badge display
-  const pendingCount = contacts.filter(contact => contact.status === 'pending').length;
+  const pendingCount = contacts.filter(contact => contact.status === 'PENDING').length;
   const incomingPendingCount = contacts.filter(
-    contact => contact.status === 'pending' && contact.direction === 'incoming'
+    contact => contact.status === 'PENDING' && contact.direction === 'INCOMING'
   ).length;
+
+  console.log("pendingCount", pendingCount);
+  console.log("incomingPendingCount",incomingPendingCount);
 
   return (
     <div className="contact-list-container">
@@ -168,6 +189,23 @@ const ContactList = ({ onSelectContact }) => {
           <>
             {activeTab === 'pending' && (
               <>
+                {/* Pending Summary Toggle Button */}
+                {pendingCount > 0 && (
+                  <div className="pending-summary-toggle">
+                    <button 
+                      className="summary-toggle-btn" 
+                      onClick={togglePendingSummary}
+                    >
+                      {showPendingSummary ? 'Hide Summary' : 'Show Requests Summary'}
+                    </button>
+                  </div>
+                )}
+                
+                {/* Pending Contacts Summary */}
+                {showPendingSummary && pendingCount > 0 && (
+                  <PendingContactsSummary pendingContacts={getPendingContacts()} />
+                )}
+              
                 {/* Incoming Requests */}
                 {getDisplayedContacts().some(contact => contact.direction === 'incoming') && (
                   <div className="contact-section">

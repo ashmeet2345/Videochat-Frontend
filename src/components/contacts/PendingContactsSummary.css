@@ -1,0 +1,108 @@
+.pending-contacts-summary {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin: 16px;
+    overflow: hidden;
+  }
+  
+  .summary-section {
+    padding: 16px;
+    border-bottom: 1px solid #e1e4e8;
+  }
+  
+  .summary-section:last-child {
+    border-bottom: none;
+  }
+  
+  .summary-section h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 16px;
+    color: #2c3e50;
+  }
+  
+  .summary-section h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #34495e;
+  }
+  
+  .summary-counts {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 8px;
+  }
+  
+  .summary-count {
+    text-align: center;
+    padding: 8px 16px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .count-label {
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 4px;
+  }
+  
+  .count-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3498db;
+  }
+  
+  .request-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .request-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  
+  .request-item:last-child {
+    border-bottom: none;
+  }
+  
+  .request-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #3498db;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+  
+  .request-details {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .request-name {
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  
+  .request-email {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 2px;
+  }
+  
+  .request-date {
+    font-size: 11px;
+    color: #95a5a6;
+  }
